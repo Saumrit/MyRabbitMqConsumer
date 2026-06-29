@@ -1,0 +1,54 @@
+server.port: 8082
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/myStudentConsumer
+  rabbitmq:
+    host: localhost
+    port: 5675
+    username: guest
+    password: guest
+    virtual-host: /
+    ssl:
+      enabled: false
+    eager-initializer: true
+  cloud:
+    function:
+      definition: consumerstudentadd
+    stream:
+      bindings:
+        consumerstudentadd-in-0:
+          destination: edu
+          group: student.add.queue
+          contentType: application/json
+          binder: rabbit
+        consumerstudentaddretry-out-0:
+          destination: edu
+          contentType: application/json
+          binder: rabbit
+      rabbit:
+        bindings:
+          consumerstudentadd-in-0:
+            consumer:
+              acknowledge: manual
+              declareExchange: false
+              bindQueue: true
+              auto-bind-dlq: true
+              republish-to-dlq: true
+              binding-routing-key: saumrit.edu.student.add
+          consumerstudentaddretry-out-0:
+            producer:
+              declareExchange: true
+              routing-key-expression: "'saumrit.edu.student.add.retry'"
+rabbitmq:
+  admin:
+    consumerstudentadd-in-0:
+      input:
+        routing-key: saumrit.edu.student.add
+      retry:
+        retry-x-message-ttl: 2000
+        x-max-retry-attempts-count: 5
+
+springdoc:
+  swagger-ui:
+    path: "/swagger-ui.html"
