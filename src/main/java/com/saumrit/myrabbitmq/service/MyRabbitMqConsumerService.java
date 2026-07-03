@@ -17,10 +17,15 @@ public class MyRabbitMqConsumerService {
         this.objectMapper = objectMapper;
     }
 
-    public boolean saveLogForStudent(TransportDTO transportDTO,String action){
+    public void saveLogForStudent(TransportDTO transportDTO,String action) throws Exception {
         StudentTrackLog studentTrackLog= objectMapper.convertValue(transportDTO, StudentTrackLog.class);
         studentTrackLog.setActionTaken(action);
+
+//        if(transportDTO.getRollId().contains("J")|| transportDTO.getRollId().contains("K") || transportDTO.getRollId().contains("L"))
+//            throw new Exception("");
+        if(6 == transportDTO.getRollId().length())
+            throw new RuntimeException("Here is the Exception :"+ transportDTO.getRollId());
         studentTrackingLogFRepository.save(studentTrackLog);
-        return true;
+        //return true;
     }
 }

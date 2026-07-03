@@ -22,32 +22,31 @@ spring:
           group: student.add.queue
           contentType: application/json
           binder: rabbit
-        consumerstudentaddretry-out-0:
-          destination: edu
-          contentType: application/json
-          binder: rabbit
+          consumer:
+            # Retry Mechanism Configuration
+            max-attempts: 3
+            back-off-initial-interval: 1000
+            back-off-max-interval: 10000
+            back-off-multiplier: 2.0
+            republish-delivery-attempts: true
+
       rabbit:
         bindings:
           consumerstudentadd-in-0:
             consumer:
-              acknowledge: manual
-              declareExchange: false
-              bindQueue: true
+              acknowledge-mode: AUTO
+              declare-exchange: false
+              bind-queue: true
+              binding-routing-key: saumrit.edu.student.add
+
+              # DLQ Configuration
               auto-bind-dlq: true
               republish-to-dlq: true
-              binding-routing-key: saumrit.edu.student.add
-          consumerstudentaddretry-out-0:
-            producer:
-              declareExchange: true
-              routing-key-expression: "'saumrit.edu.student.add.retry'"
-rabbitmq:
-  admin:
-    consumerstudentadd-in-0:
-      input:
-        routing-key: saumrit.edu.student.add
-      retry:
-        retry-x-message-ttl: 2000
-        x-max-retry-attempts-count: 5
+              dead-letter-exchange: edu.DLX
+              dead-letter-routing-key: student.add.queue.dlq
+              dlq-name-suffix: .dlq
+
+
 
 springdoc:
   swagger-ui:

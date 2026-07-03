@@ -46,7 +46,15 @@ public class MyRabbitMqConfiguration {
     @ConfigurationProperties(value = "spring.cloud.function.definition")
     public Consumer<TransportDTO> consumerstudentadd(){
         return x -> {
-            boolean isSaved=myRabbitMqConsumerService.saveLogForStudent(x,"add");
+            boolean isSaved= false;
+            try {
+                 myRabbitMqConsumerService.saveLogForStudent(x,"add");
+                 isSaved=true;
+            } catch (Exception e) {
+                System.out.println("Here is the exception for RollId : "+x.getRollId());
+                throw new RuntimeException("Here is the exception for RollId : "+x.getRollId());
+
+            }
             if(isSaved)
                 System.out.println("Entered Roll id is "+x.getRollId()+" at "+ x.getEventDateTime());
         };
